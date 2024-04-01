@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   StyleSheet,
@@ -31,7 +31,19 @@ const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigation = useNavigation();
-
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const token = await AsyncStorage.getItem("auth_token");
+        if (token) {
+          navigation.replace("Main");
+        }
+      } catch (error) {
+        console.log("Error", error);
+      }
+    };
+    checkLoginStatus();
+  }, []);
   const handleLogin = () => {
     const user = {
       email: email,
@@ -54,7 +66,7 @@ const LoginScreen = () => {
         console.log(data);
         const token = data.token;
         AsyncStorage.setItem("auth_token", token);
-        navigation.replace("Home");
+        navigation.replace("Main");
       })
       .catch((error) => {
         Alert.alert("Login error");
