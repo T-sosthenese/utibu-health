@@ -54,7 +54,6 @@ const RegisterScreen = () => {
       Alert.alert("Please fill in all required fields");
       return; // Prevent further execution if any required field is empty
     }
-
     const user = {
       firstName: firstName,
       lastName: lastName,

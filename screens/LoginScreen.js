@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   StyleSheet,
   Text,
@@ -7,6 +8,7 @@ import {
   KeyboardAvoidingView,
   TextInput,
   Pressable,
+  Alert,
 } from "react-native";
 import { FontAwesome, MaterialIcons, AntDesign } from "@expo/vector-icons"; // Import FontAwesome icons
 import { useNavigation } from "@react-navigation/native";
@@ -26,9 +28,40 @@ const styles = StyleSheet.create({
 });
 
 const LoginScreen = () => {
-  const { email, setEmail } = useState("");
-  const { password, setPassword } = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigation = useNavigation();
+
+  const handleLogin = () => {
+    const user = {
+      email: email,
+      password: password,
+    };
+    fetch("http://10.0.2.2:8000/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(user),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Login failed");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data);
+        const token = data.token;
+        AsyncStorage.setItem("auth_token", token);
+        navigation.replace("Home");
+      })
+      .catch((error) => {
+        Alert.alert("Login error");
+        console.log("Login failed!", error);
+      });
+  };
+
   return (
     <SafeAreaView
       style={{
@@ -137,6 +170,7 @@ const LoginScreen = () => {
         <View style={{ marginTop: 80 }} />
 
         <Pressable
+          onPress={handleLogin}
           style={{
             width: 200,
             backgroundColor: "#FEBE10",
