@@ -13,6 +13,7 @@ import React, { useEffect, useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 import { EvilIcons } from "@expo/vector-icons";
+import { useSelector } from "react-redux";
 import { MaterialIcons } from "@expo/vector-icons";
 import { SliderBox } from "react-native-image-slider-box";
 import { useNavigation } from "@react-navigation/native";
@@ -66,7 +67,7 @@ const HomeScreen = () => {
   const deals = [
     {
       id: "1",
-      ProductName: "Lisinopril: A hypertensive medication",
+      productName: "Lisinopril",
       listPrice: 25.13,
       image:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ9LiKwF_mFL1yZ01p9E2pzDymtLioDqKhh5A&s",
@@ -80,8 +81,7 @@ const HomeScreen = () => {
     },
     {
       id: "2",
-      ProductName:
-        "Amlodipine: An antihypertensive medication that has been proven to be effective",
+      productName: "Amlodipine",
       listPrice: 65.12,
       image:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTaNSKl0xxq40k7VLrB0bSv06PhwsXgeo3uQ&s",
@@ -95,8 +95,7 @@ const HomeScreen = () => {
     },
     {
       id: "3",
-      ProductName:
-        "Metformin: A widely prescribed medication used to manage type 2 diabetes",
+      productName: "Metformin",
       listPrice: 74.03,
       image:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7CK3GLiBtQnqS49KtBosV5KMQeKsHWJnaQg&s",
@@ -110,8 +109,7 @@ const HomeScreen = () => {
     },
     {
       id: "4",
-      ProductName:
-        "Lamivudine: A nucleoside reverse transcriptase inhibitor (NRTI) commonly used in the treatment of HIV/AIDS.",
+      productName: "Lamivudine",
       listPrice: 44.01,
       image:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxvTWwk2TmzaD78cu3aqRtVnjaJ0MFyAfx6w&s",
@@ -128,7 +126,7 @@ const HomeScreen = () => {
   const offers = [
     {
       id: "1",
-      ProductName: "Lisinopril: A hypertensive medication",
+      productName: "Lisinopril",
       listPrice: 25.13,
       image:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTw77uYKOeEyEk9-eiapIIcvqwmF6fJjQ-xNA&s",
@@ -142,8 +140,7 @@ const HomeScreen = () => {
     },
     {
       id: "2",
-      ProductName:
-        "Amlodipine: An antihypertensive medication that has been proven to be effective",
+      productName: "Amlodipine",
       listPrice: 65.12,
       image:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTCESeUj3ShSb_m5edqI1SEU5QjVKZBP209hg&s",
@@ -157,8 +154,7 @@ const HomeScreen = () => {
     },
     {
       id: "3",
-      ProductName:
-        "Metformin: A widely prescribed medication used to manage type 2 diabetes",
+      productName: "Metformin",
       listPrice: 74.03,
       image:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyvQhyQUrYyhKTn9xmuKuGqSsLfOUpzMWG-Q&s",
@@ -172,8 +168,7 @@ const HomeScreen = () => {
     },
     {
       id: "4",
-      ProductName:
-        "Lamivudine: A nucleoside reverse transcriptase inhibitor (NRTI) commonly used in the treatment of HIV/AIDS.",
+      productName: "Lamivudine",
       listPrice: 44.01,
       image:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTsVNfCTSuuRq0_qL47z0JK4qff1cT-proc5w&s",
@@ -187,6 +182,9 @@ const HomeScreen = () => {
     },
   ];
   const navigation = useNavigation();
+  const cart = useSelector((state) => state.cart.cart);
+  console.log(cart);
+
   return (
     <SafeAreaView
       style={{
@@ -295,61 +293,27 @@ const HomeScreen = () => {
           }}
         >
           {deals.map((item, index) => (
-            <View
-              key={index}
-              style={{ width: "48%", marginVertical: 10, alignItems: "center" }}
+            <Pressable
+              onPress={() =>
+                navigation.navigate("Info", {
+                  id: item.id,
+                  productName: item.productName,
+                  listPrice: item?.listPrice,
+                  carouselImages: item.carouselImages,
+                  item: item,
+                })
+              }
+              style={{
+                marginVertical: 10,
+                flexDirection: "row",
+                alignItems: "center",
+              }}
             >
-              <Text numberOfLines={1} style={{ width: 150, marginTop: 10 }}>
-                {item?.ProductName}
-              </Text>
               <Image
-                style={{ width: "100%", height: 170, resizeMode: "contain" }}
+                style={{ width: 180, height: 180, resizeMode: "contain" }}
                 source={{ uri: item?.image }}
               />
-              <View
-                style={{
-                  backgroundColor: "#E31837",
-                  paddingVertical: 5,
-                  paddingHorizontal: 10,
-                  marginTop: 10,
-                  borderRadius: 4,
-                }}
-              >
-                <Text
-                  style={{
-                    textAlign: "center",
-                    color: "white",
-                    fontSize: 16,
-                    fontWeight: "bold",
-                    width: 112,
-                  }}
-                >
-                  ${item?.listPrice}
-                </Text>
-              </View>
-              <Pressable
-                style={{
-                  backgroundColor: "#FFC72C",
-                  paddingVertical: 5,
-                  paddingHorizontal: 10,
-                  borderRadius: 4,
-                  marginTop: 5,
-                  width: 130,
-                  borderRadius: 20,
-                }}
-              >
-                <Text
-                  style={{
-                    textAlign: "center",
-                    color: "white",
-                    fontSize: 16,
-                    fontWeight: "bold",
-                  }}
-                >
-                  Add to Cart
-                </Text>
-              </Pressable>
-            </View>
+            </Pressable>
           ))}
         </View>
         <Text
@@ -369,10 +333,11 @@ const HomeScreen = () => {
               onPress={() =>
                 navigation.navigate("Info", {
                   id: item.id,
-                  ProductName: item.ProductName,
+                  productName: item.productName,
                   listPrice: item?.listPrice,
                   carouselImages: item.carouselImages,
                   categoryId: item.categoryId,
+                  item: item,
                 })
               }
               style={{
@@ -383,7 +348,7 @@ const HomeScreen = () => {
               }}
             >
               <Text numberOfLines={1} style={{ width: 150, marginTop: 10 }}>
-                {item?.ProductName}
+                {item?.productName}
               </Text>
               <Image
                 style={{ width: 150, height: 150, marginLeft: 10 }}
@@ -412,28 +377,6 @@ const HomeScreen = () => {
                   ${item?.listPrice}
                 </Text>
               </View>
-              <Pressable
-                style={{
-                  backgroundColor: "#FFC72C",
-                  paddingVertical: 5,
-                  paddingHorizontal: 10,
-                  borderRadius: 4,
-                  marginTop: 5,
-                  width: 130,
-                  borderRadius: 20,
-                }}
-              >
-                <Text
-                  style={{
-                    textAlign: "center",
-                    color: "white",
-                    fontSize: 16,
-                    fontWeight: "bold",
-                  }}
-                >
-                  Add to Cart
-                </Text>
-              </Pressable>
             </Pressable>
           ))}
         </ScrollView>
