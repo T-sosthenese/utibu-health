@@ -80,6 +80,7 @@ app.post("/login", async (req, res) => {
         if (user.password === password) {
           // Passwords match, user is authenticated
           const token = jwt.sign({ customerId: user.customerId }, secretKey);
+          console.log(token);
           return res.status(200).json({ token });
         } else {
           // Passwords do not match
@@ -99,10 +100,10 @@ app.post("/login", async (req, res) => {
 // Endpoint to update the customer addresses in the backend
 app.post("/addresses", async (req, res) => {
   try {
-    const { customerId, addresses } = req.body;
+    const { customerId, address } = req.body;
 
     // Check if customerId and addresses are provided in the request body
-    if (!customerId || !addresses) {
+    if (!customerId || !address) {
       return res
         .status(400)
         .json({ message: "customerId and addresses are required" });
@@ -136,13 +137,13 @@ app.post("/addresses", async (req, res) => {
           WHERE customerId = ?
         `;
           const updateCustomerValues = [
-            addresses.firstName || customer.firstName,
-            addresses.lastName || customer.lastName,
-            addresses.phone || customer.phone,
-            addresses.state || customer.state,
-            addresses.city || customer.city,
-            addresses.street || customer.street,
-            addresses.zipcode || customer.zipcode,
+            address.firstName || customer.firstName,
+            address.lastName || customer.lastName,
+            address.phone || customer.phone,
+            address.state || customer.state,
+            address.city || customer.city,
+            address.street || customer.street,
+            address.zipcode || customer.zipcode,
             customerId,
           ];
 

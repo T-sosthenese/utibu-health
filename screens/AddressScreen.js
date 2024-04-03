@@ -5,13 +5,18 @@ import {
   ScrollView,
   TextInput,
   Pressable,
+  Alert,
 } from "react-native";
 import React, { useEffect, useState, useContext } from "react";
 import jwt_decode from "jwt-decode";
+import { decode as base64decode } from "base-64";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserType } from "../UserContext";
+import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
 
 const AddressScreen = () => {
+  const navigation = useNavigation();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
@@ -24,15 +29,66 @@ const AddressScreen = () => {
   useEffect(() => {
     const fetchUser = async () => {
       const token = await AsyncStorage.getItem("auth_token");
-      const decodedToken = jwt_decode(token);
-      const customerId = decodedToken.customerId;
-      setCustomerId(customerId);
+      if (token) {
+        // Split the token into header, payload, and signature
+        const [, payload] = token.split(".");
+        // Decode the Base64 payload
+        const decodedPayload = JSON.parse(base64decode(payload));
+        // Extract the customerId
+        const customerId = decodedPayload.customerId;
+        setCustomerId(customerId);
+      }
     };
     fetchUser();
   }, []);
+
   console.log(customerId);
 
-  const handleAddAddress = () => {};
+  const handleAddAddress = () => {
+    const address = {
+      firstName,
+      lastName,
+      phone,
+      state,
+      city,
+      street,
+      zipcode,
+    };
+    fetch("http://10.0.2.2:8000/addresses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        customerId: customerId,
+        address: address,
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        Alert.alert("Address added successfully");
+        setFirstName("");
+        setLastName("");
+        setPhone("");
+        setState("");
+        setCity("");
+        setStreet("");
+        setZipcode("");
+
+        setTimeout(() => {
+          navigation.goBack();
+        }, 500);
+      })
+      .catch((error) => {
+        Alert.alert("Failed to add address");
+        console.log("Error", error);
+      });
+  };
 
   return (
     <ScrollView style={{ marginTop: 50 }}>
