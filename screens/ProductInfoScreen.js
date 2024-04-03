@@ -35,7 +35,7 @@ const ProductInfoScreen = () => {
     dispatch(addToCart(item));
     setTimeout(() => {
       setAddedToCart(false);
-    }, 60000);
+    }, 2000);
   };
   const cart = useSelector((state) => state.cart.cart);
   console.log(cart);
