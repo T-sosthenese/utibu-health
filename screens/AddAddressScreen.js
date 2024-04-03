@@ -40,7 +40,7 @@ const AddAddressScreen = () => {
   useFocusEffect(
     useCallback(() => {
       fetchAddresses();
-    })
+    }, [])
   );
 
   console.log("addresses", addresses);
