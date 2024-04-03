@@ -6,10 +6,10 @@ import {
   Pressable,
   TextInput,
 } from "react-native";
-import React, { useEffect, useContext, useState } from "react";
+import React, { useEffect, useContext, useState, useCallback } from "react";
 import { Feather, AntDesign } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { UserType } from "../UserContext";
 import { Entypo } from "@expo/vector-icons";
 
@@ -35,6 +35,13 @@ const AddAddressScreen = () => {
       console.log("error", error);
     }
   };
+
+  // Refresh the addresses when the component comes to focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchAddresses();
+    })
+  );
 
   console.log("addresses", addresses);
   return (
