@@ -13,7 +13,6 @@ import { decode as base64decode } from "base-64";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserType } from "../UserContext";
 import { useNavigation } from "@react-navigation/native";
-import axios from "axios";
 
 const AddressScreen = () => {
   const navigation = useNavigation();
@@ -42,7 +41,7 @@ const AddressScreen = () => {
     fetchUser();
   }, []);
 
-  console.log(customerId);
+  // console.log(customerId);
 
   const handleAddAddress = () => {
     const address = {
@@ -71,7 +70,7 @@ const AddressScreen = () => {
         return response.json();
       })
       .then((data) => {
-        Alert.alert("Address added successfully");
+        Alert.alert("Success", "Address added successfully");
         setFirstName("");
         setLastName("");
         setPhone("");

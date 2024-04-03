@@ -9,7 +9,7 @@ import {
   TextInput,
   Image,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 import { EvilIcons } from "@expo/vector-icons";
@@ -19,6 +19,9 @@ import { SliderBox } from "react-native-image-slider-box";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
+import { UserType } from "../UserContext";
+import { decode as base64decode } from "base-64";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BottomModal, SlideAnimation, ModalContent } from "react-native-modals";
 
 const HomeScreen = () => {
@@ -187,6 +190,46 @@ const HomeScreen = () => {
   const navigation = useNavigation();
   const cart = useSelector((state) => state.cart.cart);
   const [modalVisible, setModalVisible] = useState(false);
+  const [addresses, setAddresses] = useState([]);
+  const { customerId, setCustomerId } = useContext(UserType);
+  const [selectedAddress, setSelectedAddress] = useState("");
+  console.log(selectedAddress);
+  useEffect(() => {
+    if (customerId) {
+      fetchAddresses();
+    }
+  }, []);
+
+  const fetchAddresses = async () => {
+    try {
+      const response = await fetch(
+        `http://10.0.2.2:8000/addresses/${customerId}`
+      );
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const addresses = await response.json();
+      setAddresses(addresses);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = await AsyncStorage.getItem("auth_token");
+      if (token) {
+        // Split the token into header, payload, and signature
+        const [, payload] = token.split(".");
+        // Decode the Base64 payload
+        const decodedPayload = JSON.parse(base64decode(payload));
+        // Extract the customerId
+        const customerId = decodedPayload.customerId;
+        setCustomerId(customerId);
+      }
+    };
+    fetchUser();
+  }, []);
 
   return (
     <>
@@ -238,12 +281,24 @@ const HomeScreen = () => {
               backgroundColor: "#AFEEEE",
             }}
           >
-            <EvilIcons name="location" size={24} color="black" />
-            <Pressable>
-              <Text style={{ fontSize: 13, fontWeight: "500" }}>
-                Deliver to Sosthene - Nairobi, 00100
-              </Text>
+            <Ionicons name="location-outline" size={24} color="black" />
+
+            <Pressable
+              onPress={() => setModalVisible(!modalVisible)} // Handle press on the entire section
+              style={{ flex: 1 }} // Ensure the text takes up the remaining space
+            >
+              {selectedAddress ? (
+                <Text>
+                  Deliver to {selectedAddress?.firstName}{" "}
+                  {selectedAddress?.lastName} - {selectedAddress?.street}
+                </Text>
+              ) : (
+                <Text style={{ fontSize: 13, fontWeight: "500" }}>
+                  Add an Address
+                </Text>
+              )}
             </Pressable>
+
             <MaterialIcons name="keyboard-arrow-down" size={24} color="black" />
           </Pressable>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -434,7 +489,51 @@ const HomeScreen = () => {
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {/* Already added addresses */}
+            <Pressable
+              onPress={() => setSelectedAddress(addresses)}
+              style={{
+                width: 140,
+                height: 140,
+                borderColor: "#D0D0D0",
+                borderWidth: 1,
+                padding: 10,
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 3,
+                marginRight: 15,
+                marginTop: 10,
+                backgroundColor:
+                  selectedAddress === addresses ? "#FBCEB1" : "white",
+              }}
+            >
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 3 }}
+              >
+                <Text
+                  style={{
+                    fontSize: 13,
+                    fontWeight: "bold",
+                    textAlign: "left",
+                  }}
+                >
+                  {addresses?.firstName} {addresses?.lastName}
+                </Text>
+                <Entypo name="location-pin" size={24} color="red" />
+              </View>
 
+              <Text
+                numberOfLines={1}
+                style={{ width: 130, fontSize: 13, textAlign: "left" }}
+              >
+                {addresses?.street}, {addresses?.city}
+              </Text>
+              <Text
+                numberOfLines={1}
+                style={{ width: 130, fontSize: 13, textAlign: "left" }}
+              >
+                {addresses?.state}
+              </Text>
+            </Pressable>
             <Pressable
               onPress={() => {
                 setModalVisible(false);
