@@ -1,7 +1,8 @@
-import { StyleSheet, Text, View, ScrollView } from "react-native";
+import { StyleSheet, Text, View, ScrollView, Pressable } from "react-native";
 import React, { useState, useEffect, useContext } from "react";
 import { UserType } from "../UserContext";
 import { Entypo } from "@expo/vector-icons";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 const ConfirmationScreen = () => {
   const steps = [
@@ -32,7 +33,7 @@ const ConfirmationScreen = () => {
       console.log("error", error);
     }
   };
-  console.log(addresses);
+  const [selectedAddress, setSelectedAddress] = useState("");
 
   return (
     <ScrollView style={{ marginTop: 55 }}>
@@ -99,7 +100,168 @@ const ConfirmationScreen = () => {
             Select a delivery address
           </Text>
 
-          <Pressable>{addresses?.map((item, index))}</Pressable>
+          <Pressable>
+            <Pressable
+              style={{
+                borderWidth: 1,
+                backgroundColor: "white",
+                padding: 10,
+                flexDirection: "row",
+                gap: 5,
+                paddingBottom: 17,
+                marginVertical: 7,
+                alignItems: "center",
+                borderRadius: 6,
+              }}
+            >
+              {selectedAddress ? (
+                <FontAwesome5 name="dot-circle" size={24} color="black" />
+              ) : (
+                <Entypo
+                  onPress={() => setSelectedAddress(addresses)}
+                  name="circle"
+                  size={24}
+                  color="black"
+                />
+              )}
+
+              <View style={{ marginLeft: 6 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 3,
+                  }}
+                >
+                  <Text style={{ fontSize: 15, fontWeight: "bold" }}>
+                    {addresses?.firstName} {addresses?.lastName}
+                  </Text>
+                  <Entypo name="location-pin" size={24} color="red" />
+                </View>
+                <Text style={{ fontSize: 15, color: "#181818" }}>
+                  {addresses?.street}, {addresses?.city} - {addresses?.zipcode}
+                </Text>
+                <Text style={{ fontSize: 15, color: "#181818" }}>
+                  {addresses?.state}
+                </Text>
+                <Text style={{ fontSize: 15, color: "#181818" }}>
+                  Phone number: {addresses?.phone}{" "}
+                </Text>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 10,
+                    marginTop: 10,
+                  }}
+                >
+                  <Pressable
+                    style={{
+                      backgroundColor: "#F5F5F5",
+                      paddingHorizontal: 10,
+                      paddingVertical: 6,
+                      borderRadius: 5,
+                      borderWidth: 0.9,
+                      borderColor: "#D0D0D0",
+                    }}
+                  >
+                    <Text>Edit</Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={{
+                      backgroundColor: "#F5F5F5",
+                      paddingHorizontal: 10,
+                      paddingVertical: 6,
+                      borderRadius: 5,
+                      borderWidth: 0.9,
+                      borderColor: "#D0D0D0",
+                    }}
+                  >
+                    <Text>Remove</Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={{
+                      backgroundColor: "#F5F5F5",
+                      paddingHorizontal: 10,
+                      paddingVertical: 6,
+                      borderRadius: 5,
+                      borderWidth: 0.9,
+                      borderColor: "#D0D0D0",
+                    }}
+                  >
+                    <Text>Set as default</Text>
+                  </Pressable>
+                </View>
+                <View>
+                  {selectedAddress && (
+                    <Pressable
+                      onPress={() => setCurrentStep(1)}
+                      style={{
+                        backgroundColor: "#008397",
+                        padding: 10,
+                        borderRadius: 20,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        marginTop: 10,
+                      }}
+                    >
+                      <Text style={{ textAlign: "center", color: "white" }}>
+                        Deliver to this address
+                      </Text>
+                    </Pressable>
+                  )}
+                </View>
+              </View>
+            </Pressable>
+          </Pressable>
+        </View>
+      )}
+
+      {currentStep == 1 && (
+        <View style={{ marginHorizontal: 20 }}>
+          <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+            Choose your delivery options
+          </Text>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              backgroundColor: "white",
+              padding: 8,
+              gap: 7,
+              borderColor: "#D0D0D0",
+              borderWidth: 1,
+              marginTop: 10,
+            }}
+          >
+            <Entypo
+              onPress={() => setSelectedAddress(addresses)}
+              name="circle"
+              size={24}
+              color="black"
+            />
+            <Text style={{ flex: 1 }}>
+              <Text style={{ color: "green", fontWeight: "500" }}>
+                Tomorrow by 5pm
+              </Text>{" "}
+              - FREE delivery with your Prime membership
+            </Text>
+          </View>
+
+          <Pressable
+            style={{
+              backgroundColor: "#FFC72C",
+              padding: 10,
+              borderRadius: 20,
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: 15,
+            }}
+          >
+            <Text>Continue</Text>
+          </Pressable>
         </View>
       )}
     </ScrollView>
