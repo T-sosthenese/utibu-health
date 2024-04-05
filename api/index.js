@@ -217,6 +217,82 @@ app.get("/addresses/:customerId", async (req, res) => {
   }
 });
 
+// Endpoint to store all the orders
+app.post("/orders", async (req, res) => {
+  const { customerId, cartItems, totalPrice, shippingAddress, paymentMethod } =
+    req.body;
+
+  try {
+    // Loop through each item in the cartItems array and insert into the database
+    for (const item of cartItems) {
+      const { id, productName, listPrice, quantity } = item;
+
+      // Calculate the total for the current item
+      const total = listPrice * quantity;
+
+      // SQL query to insert order details into the database
+      const query = `
+        INSERT INTO medication.orders (customerId, productName, listPrice, quantity, total)
+        VALUES (?, ?, ?, ?, ?)
+      `;
+      const values = [customerId, productName, listPrice, quantity, total];
+
+      // Execute the query directly using the connection string
+      sql.query(connectionString, query, values, (err, result) => {
+        if (err) {
+          console.error("Error inserting order:", err);
+        } else {
+          console.log("Order inserted successfully");
+        }
+      });
+    }
+
+    // Send a success response
+    res
+      .status(200)
+      .json({ message: "Orders successfully stored in the database" });
+  } catch (error) {
+    // Handle errors
+    console.error("Error storing orders:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// Endpoint to retrieve all orders associated with the current customerId
+app.get("/orders/:customerId", async (req, res) => {
+  try {
+    const customerId = req.params.customerId;
+
+    // Query the database to retrieve all orders associated with the current customerId
+    const query = `
+      SELECT * FROM medication.orders
+      WHERE customerId = ?
+    `;
+    const values = [customerId];
+
+    sql.query(connectionString, query, values, (err, result) => {
+      if (err) {
+        console.error("Error querying orders:", err);
+        return res.status(500).json({ message: "Internal Server Error" });
+      }
+
+      // Check if orders are found
+      if (result && result.length > 0) {
+        // Orders found, return them
+        return res.status(200).json({ orders: result });
+      } else {
+        // No orders found for the specified customerId
+        return res
+          .status(404)
+          .json({ message: "No orders found for this user" });
+      }
+    });
+  } catch (error) {
+    console.error("Error retrieving orders:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });

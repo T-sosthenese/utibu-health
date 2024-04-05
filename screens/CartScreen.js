@@ -18,12 +18,16 @@ import {
 import { useNavigation } from "@react-navigation/native";
 
 const CartScreen = () => {
-  const cart = useSelector((state) => state.cart.cart);
   const navigation = useNavigation();
-  console.log(cart);
-  const total = cart
+
+  const cart = useSelector((state) => state.cart.cart);
+  const unroundedTotal = cart
     ?.map((item) => item.listPrice * item.quantity)
     .reduce((curr, prev) => curr + prev, 0);
+
+  // Round the total to 2 decimal places and convert it back to a float
+  const total = parseFloat(unroundedTotal.toFixed(2));
+
   const dispatch = useDispatch();
 
   const increaseQuantity = (item) => {

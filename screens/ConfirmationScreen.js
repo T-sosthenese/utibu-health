@@ -2,7 +2,10 @@ import { StyleSheet, Text, View, ScrollView, Pressable } from "react-native";
 import React, { useState, useEffect, useContext } from "react";
 import { UserType } from "../UserContext";
 import { Entypo } from "@expo/vector-icons";
-import { FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
+import { cleanCart } from "../redux/CartReducer";
 
 const ConfirmationScreen = () => {
   const steps = [
@@ -14,11 +17,19 @@ const ConfirmationScreen = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [addresses, setAddresses] = useState([]);
   const { customerId, setCustomerId } = useContext(UserType);
+  const navigation = useNavigation();
 
   useEffect(() => {
     fetchAddresses();
   }, []);
 
+  const cart = useSelector((state) => state.cart.cart);
+  const unroundedTotal = cart
+    ?.map((item) => item.listPrice * item.quantity)
+    .reduce((curr, prev) => curr + prev, 0);
+
+  // Round the total to 2 decimal places and convert it back to a float
+  const total = parseFloat(unroundedTotal.toFixed(2));
   const fetchAddresses = async () => {
     try {
       const response = await fetch(
@@ -33,7 +44,42 @@ const ConfirmationScreen = () => {
       console.log("error", error);
     }
   };
+  const dispatch = useDispatch();
   const [selectedAddress, setSelectedAddress] = useState("");
+  const [option, setOption] = useState(false);
+  const [selectedOption, setSelectedOption] = useState("");
+
+  const handlePlaceOrder = async () => {
+    try {
+      const orderData = {
+        customerId: customerId,
+        cartItems: cart,
+        totalPrice: total,
+        shippingAddress: selectedAddress,
+        paymentMethod: selectedOption,
+      };
+
+      const response = await fetch("http://10.0.2.2:8000/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        navigation.navigate("Order");
+        dispatch(cleanCart());
+        console.log("Order created successfully", responseData);
+      } else {
+        const errorData = await response.json();
+        console.log("Error creating order:", errorData);
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
 
   return (
     <ScrollView style={{ marginTop: 55 }}>
@@ -120,7 +166,7 @@ const ConfirmationScreen = () => {
                 <Entypo
                   onPress={() => setSelectedAddress(addresses)}
                   name="circle"
-                  size={24}
+                  size={20}
                   color="black"
                 />
               )}
@@ -236,12 +282,17 @@ const ConfirmationScreen = () => {
               marginTop: 10,
             }}
           >
-            <Entypo
-              onPress={() => setSelectedAddress(addresses)}
-              name="circle"
-              size={24}
-              color="black"
-            />
+            {option ? (
+              <FontAwesome5 name="dot-circle" size={24} color="black" />
+            ) : (
+              <Entypo
+                onPress={() => setOption(!option)}
+                name="circle"
+                size={20}
+                color="black"
+              />
+            )}
+
             <Text style={{ flex: 1 }}>
               <Text style={{ color: "green", fontWeight: "500" }}>
                 Tomorrow by 5pm
@@ -251,6 +302,7 @@ const ConfirmationScreen = () => {
           </View>
 
           <Pressable
+            onPress={() => setCurrentStep(2)}
             style={{
               backgroundColor: "#FFC72C",
               padding: 10,
@@ -261,6 +313,210 @@ const ConfirmationScreen = () => {
             }}
           >
             <Text>Continue</Text>
+          </Pressable>
+        </View>
+      )}
+
+      {currentStep == 2 && (
+        <View style={{ marginHorizontal: 20 }}>
+          <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+            Select your payment method
+          </Text>
+
+          <View
+            style={{
+              backgroundColor: "white",
+              padding: 8,
+              borderColor: "#D0D0D0",
+              borderWidth: 1,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 7,
+              marginTop: 12,
+            }}
+          >
+            {selectedOption === "cash" ? (
+              <FontAwesome5 name="dot-circle" size={24} color="#008397" />
+            ) : (
+              <Entypo
+                onPress={() => setSelectedOption("cash")}
+                name="circle"
+                size={20}
+                color="black"
+              />
+            )}
+            <Text>Cash on delivery</Text>
+          </View>
+
+          <View
+            style={{
+              backgroundColor: "white",
+              padding: 8,
+              borderColor: "#D0D0D0",
+              borderWidth: 1,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 7,
+              marginTop: 12,
+            }}
+          >
+            {selectedOption === "card" ? (
+              <FontAwesome5 name="dot-circle" size={24} color="#008397" />
+            ) : (
+              <Entypo
+                onPress={() => setSelectedOption("card")}
+                name="circle"
+                size={20}
+                color="black"
+              />
+            )}
+
+            <Text>Debit or credit card</Text>
+          </View>
+
+          <Pressable
+            onPress={() => setCurrentStep(3)}
+            style={{
+              backgroundColor: "#FFC72C",
+              padding: 10,
+              borderRadius: 20,
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: 15,
+            }}
+          >
+            <Text>Continue</Text>
+          </Pressable>
+        </View>
+      )}
+
+      {currentStep === 3 && selectedOption === "cash" && (
+        <View style={{ marginHorizontal: 20 }}>
+          <Text style={{ fontSize: 20, fontWeight: "bold" }}>Order Now</Text>
+
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 8,
+              backgroundColor: "white",
+              padding: 8,
+              borderColor: "#D0D0D0",
+              borderWidth: 1,
+              marginTop: 10,
+            }}
+          >
+            <View>
+              <Text style={{ fontSize: 17, fontWeight: "bold" }}>
+                Save 5% and never run out
+              </Text>
+              <Text style={{ fontSize: 15, color: "gray", marginTop: 5 }}>
+                Turn on auto deliveries
+              </Text>
+            </View>
+
+            <MaterialIcons
+              name="keyboard-arrow-right"
+              size={24}
+              color="black"
+            />
+          </View>
+
+          <View>
+            <Text
+              style={{
+                backgroundColor: "white",
+                padding: 8,
+                borderColor: "#D0D0D0",
+                borderWidth: 1,
+                marginTop: 10,
+              }}
+            >
+              Shipping to {selectedAddress?.firstName}{" "}
+              {selectedAddress?.lastName}
+            </Text>
+
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginTop: 8,
+              }}
+            >
+              <Text style={{ fontSize: 16, fontWeight: "500", color: "gray" }}>
+                Items
+              </Text>
+
+              <Text style={{ color: "gray", fontSize: 16 }}>${total}</Text>
+            </View>
+
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginTop: 8,
+              }}
+            >
+              <Text style={{ fontSize: 16, fontWeight: "500", color: "gray" }}>
+                Delivery
+              </Text>
+
+              <Text style={{ color: "gray", fontSize: 16 }}>$0</Text>
+            </View>
+
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginTop: 8,
+              }}
+            >
+              <Text
+                style={{ fontSize: 20, fontWeight: "bold", color: "black" }}
+              >
+                Order Total
+              </Text>
+
+              <Text
+                style={{ color: "#C60C30", fontSize: 17, fontWeight: "bold" }}
+              >
+                ${total}
+              </Text>
+            </View>
+          </View>
+
+          <View
+            style={{
+              backgroundColor: "white",
+              padding: 8,
+              borderColor: "D0D0D0",
+              borderWidth: 1,
+              marginTop: 10,
+            }}
+          >
+            <Text style={{ fontSize: 16, color: "gray" }}>Pay with</Text>
+
+            <Text style={{ fontSize: 16, fontWeight: "600", marginTop: 7 }}>
+              Pay on delivery (cash)
+            </Text>
+          </View>
+
+          <Pressable
+            onPress={handlePlaceOrder}
+            style={{
+              backgroundColor: "#FFC72C",
+              padding: 10,
+              borderRadius: 20,
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: 20,
+            }}
+          >
+            <Text>Place your order</Text>
           </Pressable>
         </View>
       )}
