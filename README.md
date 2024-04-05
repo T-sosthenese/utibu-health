@@ -1,5 +1,7 @@
 # Utibu Health - Mobile App
 
+Video illustration: (https://youtu.be/8n5ZEcIB3pI)
+
 Welcome to Utibu Health! This repository houses the source code for the Utibu Health mobile application, crafted using Expo for Android. Utibu Health aims to streamline the process of ordering medication online, ensuring a seamless experience for users.
 
 ## Prerequisites
@@ -75,10 +77,12 @@ You can find more details about the above installations in this video: (https://
 
 1. **Changing project variables:** Go to the index.js and customer/RegisterCustomer.js files in the api folder and replace connectionString with your SQL server's actual connection string. Remember to include an escape character between the username and sql instance to avoid misbehavior.
 
-2. **Initializing the frontend:** Navigate to the root directory of the project from the cmd and type `npx expo start -c`. An option will pop up asking you to select the runtime environment. Type `a` to indicate that you want to run your android app. Your app will connect with the emulator launch earlier from the vs code. Wait for the bundling process to finish.
+2. **Creating the database:** Go to the search button at the bottom of windows and search for `SQL Server Management Studio` and launch it. It will act as the graphical interphase for interacting with our database. Then, expand the database tab and select `New database`. Create a database with the name `utibu`. While the new database is selected, Go to the file option at the top right corner, select open, and then file. Select the utibuHealth file and click on the `Execute` tab on the ribbon above. This script will create a database for storing our data. Conversely, you can click on the database and select the `New Quer` and the top ribbon. Then copy and paste the `utibuHealth.sql` file and execute it. Your database is now ready.
 
-3. **Initializing the backend:** Open another terminal and navigate to the root api directory. Run the `npm start` to initialize your backend.
+3. **Initializing the frontend:** Navigate to the root directory of the project from the cmd and type `npx expo start -c`. An option will pop up asking you to select the runtime environment. Type `a` to indicate that you want to run your android app. Your app will connect with the emulator launch earlier from the vs code. Wait for the bundling process to finish.
 
-4. **Start using the app:** Register and start enjoying the services. The online payment option is currently under development so kindly select the payment on delivery option.
+4. **Initializing the backend:** Open another terminal and navigate to the root api directory. Run the `npm start` to initialize your backend.
+
+5. **Start using the app:** Register and start enjoying the services. The online payment option is currently under development so kindly select the payment on delivery option.
 
 Happy coding with Utibu Health! If you have any questions or encounter any issues, feel free to reach out for assistance through the email (sosthenetimi94@gmail.com)
