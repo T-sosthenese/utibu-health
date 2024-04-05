@@ -14,8 +14,8 @@ const OrderScreen = () => {
         email shortly.
       </Text>
       <Button
-        title="Go to Home"
-        onPress={() => navigation.navigate("Home")} // Adjust the navigation route as per your app's structure
+        title="View all your orders now"
+        onPress={() => navigation.navigate("Profile")} // Adjust the navigation route as per your app's structure
       />
     </View>
   );

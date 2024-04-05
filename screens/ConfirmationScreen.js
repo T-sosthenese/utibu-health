@@ -1,4 +1,11 @@
-import { StyleSheet, Text, View, ScrollView, Pressable } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  Pressable,
+  Alert,
+} from "react-native";
 import React, { useState, useEffect, useContext } from "react";
 import { UserType } from "../UserContext";
 import { Entypo } from "@expo/vector-icons";
@@ -78,6 +85,13 @@ const ConfirmationScreen = () => {
       }
     } catch (error) {
       console.log("Error:", error);
+    }
+  };
+
+  const pay = async () => {
+    try {
+    } catch (error) {
+      console.log("Error", error);
     }
   };
 
@@ -364,7 +378,23 @@ const ConfirmationScreen = () => {
               <FontAwesome5 name="dot-circle" size={24} color="#008397" />
             ) : (
               <Entypo
-                onPress={() => setSelectedOption("card")}
+                onPress={() => {
+                  setSelectedOption("card");
+                  Alert.alert(
+                    "Our online payment under maintainance",
+                    "Opt for cash on delivery",
+                    [
+                      {
+                        text: "Cancel",
+                        onPress: () => console.log("Cancel is pressed"),
+                      },
+                      {
+                        text: "OK",
+                        onPress: () => pay(),
+                      },
+                    ]
+                  );
+                }}
                 name="circle"
                 size={20}
                 color="black"
