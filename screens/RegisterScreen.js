@@ -87,6 +87,7 @@ const RegisterScreen = () => {
         setStreet("");
         setZipcode("");
         setPassword("");
+        navigation.replace("Login");
       })
       .catch((error) => {
         Alert.alert("Registration error");
