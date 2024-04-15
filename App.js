@@ -6,6 +6,11 @@ import store from "./Store";
 import { ModalPortal } from "react-native-modals";
 import { UserContext } from "./UserContext";
 
+// Ignore specific warnings
+LogBox.ignoreLogs([
+  "ViewPropTypes will be removed from React Native. Migrate to ViewPropTypes exported from 'deprecated-react-native-prop-types'.",
+]);
+
 export default function App() {
   return (
     <>
