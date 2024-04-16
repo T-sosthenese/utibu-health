@@ -25,12 +25,6 @@ const ProfileScreen = () => {
       headerStyle: {
         backgroundColor: "#00CED1",
       },
-      headerLeft: () => (
-        <Image
-          style={{ width: 140, height: 120, resizeMode: "contain" }}
-          source={{ uri: "" }}
-        />
-      ),
       headerRight: () => (
         <View
           style={{
