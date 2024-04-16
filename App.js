@@ -1,5 +1,4 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, LogBox, Text, View } from "react-native";
+import { StyleSheet, LogBox } from "react-native";
 import StackNavigator from "./navigation/StackNavigator";
 import { Provider } from "react-redux";
 import store from "./Store";
