@@ -217,43 +217,133 @@ app.get("/addresses/:customerId", async (req, res) => {
   }
 });
 
-// Endpoint to store all the orders
+// Endpoint to create orders in the database
 app.post("/orders", async (req, res) => {
-  const { customerId, cartItems, totalPrice, shippingAddress, paymentMethod } =
-    req.body;
+  const { customerId, cartItems, totalPrice, paymentMethod } = req.body;
 
   try {
-    // Loop through each item in the cartItems array and insert into the database
-    for (const item of cartItems) {
-      const { id, productName, listPrice, quantity } = item;
+    // Check if customerId exists in the medication.customers table
+    const customerCheckQuery =
+      "SELECT COUNT(*) AS customerCount FROM medication.customers WHERE customerId = ?";
+    const customerCheckValues = [customerId];
 
-      // Calculate the total for the current item
-      const total = listPrice * quantity;
-
-      // SQL query to insert order details into the database
-      const query = `
-        INSERT INTO medication.orders (customerId, productName, listPrice, quantity, total)
-        VALUES (?, ?, ?, ?, ?)
-      `;
-      const values = [customerId, productName, listPrice, quantity, total];
-
-      // Execute the query directly using the connection string
-      sql.query(connectionString, query, values, (err, result) => {
-        if (err) {
-          console.error("Error inserting order:", err);
-        } else {
-          console.log("Order inserted successfully");
+    // Execute the customer check query
+    const customerCheckResult = await new Promise((resolve, reject) => {
+      sql.query(
+        connectionString,
+        customerCheckQuery,
+        customerCheckValues,
+        (err, result) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
         }
-      });
+      );
+    });
+
+    const customerCount = customerCheckResult[0].customerCount;
+
+    if (customerCount === 0) {
+      // If customerId does not exist, return an error
+      return res.status(400).json({ message: "Invalid customerId" });
     }
 
-    // Send a success response
+    // Calculate total quantity
+    const totalQuantity = cartItems.reduce(
+      (acc, item) => acc + item.quantity,
+      0
+    );
+
+    // Insert order into medication.orders table
+    const insertOrderQuery =
+      "INSERT INTO medication.orders (customerId, quantity, total, paymentOption, orderStatus) VALUES (?, ?, ?, ?, ?)";
+    const orderValues = [
+      customerId,
+      totalQuantity,
+      totalPrice,
+      paymentMethod,
+      null,
+    ];
+
+    // Execute the order insertion query
+    await new Promise((resolve, reject) => {
+      sql.query(
+        connectionString,
+        insertOrderQuery,
+        orderValues,
+        async (err, result) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        }
+      );
+    });
+
+    // Fetch the last orderId for the current customerId
+    const fetchOrderIdQuery = `SELECT TOP 1 orderId FROM medication.orders WHERE customerId = ? ORDER BY orderId DESC`;
+    const fetchOrderIdValues = [customerId];
+
+    const orderIdResult = await new Promise((resolve, reject) => {
+      sql.query(
+        connectionString,
+        fetchOrderIdQuery,
+        fetchOrderIdValues,
+        (err, result) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        }
+      );
+    });
+
+    const orderId = orderIdResult[0].orderId;
+
+    if (!orderId) {
+      return res.status(500).json({ message: "Failed to retrieve orderId" });
+    }
+
+    // Define the insertOrderItemsQuery within the route handler function
+    const insertOrderItemsQuery =
+      "INSERT INTO medication.orderItems (orderId, productName, listPrice, quantity) VALUES (?, ?, ?, ?)";
+
+    // Function to insert order item
+    const insertOrderItem = async (item) => {
+      const { productName, listPrice, quantity } = item;
+
+      const orderItemValues = [orderId, productName, listPrice, quantity];
+
+      return new Promise((resolve, reject) => {
+        sql.query(
+          connectionString,
+          insertOrderItemsQuery,
+          orderItemValues,
+          (err, result) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(result);
+            }
+          }
+        );
+      });
+    };
+
+    // Insert order items sequentially using Promise.all
+    await Promise.all(cartItems.map((item) => insertOrderItem(item)));
+
+    // All order items inserted successfully
     res
       .status(200)
-      .json({ message: "Orders successfully stored in the database" });
+      .json({ message: "Order successfully stored in the database" });
   } catch (error) {
     // Handle errors
-    console.error("Error storing orders:", error);
+    console.error("Error storing order:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
