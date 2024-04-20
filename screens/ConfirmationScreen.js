@@ -25,6 +25,7 @@ const ConfirmationScreen = () => {
   const [addresses, setAddresses] = useState([]);
   const { customerId, setCustomerId } = useContext(UserType);
   const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchAddresses();
@@ -58,6 +59,9 @@ const ConfirmationScreen = () => {
 
   const handlePlaceOrder = async () => {
     try {
+      // Set loading to true when placing order
+      setLoading(true);
+
       const orderData = {
         customerId: customerId,
         cartItems: cart,
@@ -85,6 +89,9 @@ const ConfirmationScreen = () => {
       }
     } catch (error) {
       console.log("Error:", error);
+    } finally {
+      // Set loading back to false regardless of success or failure
+      setLoading(false);
     }
   };
 
@@ -545,8 +552,9 @@ const ConfirmationScreen = () => {
               alignItems: "center",
               marginTop: 20,
             }}
+            disabled={loading} // Disable the button when loading
           >
-            <Text>Place your order</Text>
+            {loading ? <Text>Loading...</Text> : <Text>Place your order</Text>}
           </Pressable>
         </View>
       )}
